@@ -142,6 +142,14 @@ Click **Create subnet**.
 3. **Subnet associations → Edit subnet associations**
    - Select `app-subnet`
    - Save
+   - 
+     ### Route Table Configuration Summary
+
+| Route Table Name | Type       | Associated Subnet(s) | Destination (0.0.0.0/0) | Target            | Internet Access |
+|------------------|------------|----------------------|--------------------------|-------------------|-----------------|
+| **Public RT**    | Public     | Web Subnet           | 0.0.0.0/0               | Internet Gateway (igw) | ✅ Yes |
+| **Private RT**   | Private    | App Subnet (Private) | 0.0.0.0/0               | NAT Gateway (nat)      | ⚙️ Via NAT |
+
 
 Verification: `public-rt` should show IGW route; `private-rt` should show NAT gateway route.
 
