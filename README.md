@@ -642,8 +642,9 @@ use studentdb;
 create table students(id int primary key auto_increment, fullname varchar(50),email varchar(50), phone bigint, course varchar(20));
 desc students;
 ```
+![mysql table](https://github.com/user-attachments/assets/4e8aafd5-12a8-4c27-95b9-4058e088afbe)
 
-Verify the table exists.
+The image is the Proof that the table we Created certainly exists.
 
 ---
 
@@ -658,7 +659,9 @@ http://<WEB_PUBLIC_IP>/form.html
 ```sql
 select * from students;
 ```
-You should see the submitted entries.
+You should see the submitted entries Ex - 
+
+![last result mysql](https://github.com/user-attachments/assets/ddb56950-228d-44a2-b8a5-be957048198d)
 
 ---
 
