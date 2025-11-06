@@ -13,13 +13,15 @@ Step-by-step hands-on walkthrough to build a secure 3‑tier web application on 
 ## 🧭 Overview
 
 In this hands-on lab you will design and deploy a **3-Tier Web Application Architecture** on Amazon Web Services (AWS). The stack includes:
+# AWS VPC Components Comparison
 
-- **VPC** for network isolation and routing
-- **Public and Private Subnets**
-- **Internet Gateway (IGW)** and **NAT Gateway**
-- **EC2** instances for **Web** and **App** tiers
-- **RDS (MySQL/Aurora)** for the Database tier
-- **Security Groups** to control access between tiers
+| **Characteristic** | **VPC** | **Subnet** | **Route Table** | **Internet Gateway** | **NAT Gateway** | **EC2 Instance** | **RDS Database** |
+|--------------------|---------|-------------|------------------|----------------------|-----------------|------------------|------------------|
+| **Purpose** | Parent container for all components | Subdivision of VPC, lives in AZ | Defines traffic paths for subnets | Connects VPC to the Internet | Enables outbound internet access for private subnets | Compute layer for applications | Data layer for storing information |
+| **Location** | Exists as a private network space | Lives in a specific Availability Zone | Associated with subnets | Attaches directly to the VPC | Sits inside a Public Subnet | Web Tier in Public Subnet, App Tier in Private Subnet | Deployed inside the Private Subnet |
+| **Connectivity** | Connects to Internet Gateway | Connected to Route Table | Points to Internet Gateway or NAT Gateway | Connects VPC to the Internet | Uses Internet Gateway for outbound traffic | Web Tier to Internet Gateway, App Tier to NAT Gateway | Connects to App Tier via VPC internal routing |
+| **Access** | Acts as a private network space | Public or Private | Public Route Table enables public access, Private Route Table enables indirect access | Enables public access for subnets | Allows internet access for private instances, remains unreachable from internet | Web Tier handles web traffic, App Tier talks to web tier and database | Only App Tier can communicate directly |
+
 
 This guide is instructor-style: each step tells you what you will do and why. It preserves the full commands, scripts, and configuration blocks so you can copy-paste during the lab.
 
@@ -688,23 +690,10 @@ You should see the submitted entries Ex -
 
 **Proxy or PHP not working**
 - Confirm `proxy_pass` uses correct App Server private IP.
-- Check Nginx logs:
-```bash
-sudo tail -n 200 /var/log/nginx/error.log
-sudo tail -n 200 /var/log/nginx/access.log
-```
-- Check PHP-FPM logs:
-```bash
-sudo journalctl -u php8.3-fpm --no-pager | tail -n 50
-```
 
 **RDS connection fails**
 - Verify `rds-sg` inbound rule allows MySQL 3306 from `app-sg`.
 - Confirm endpoint and credentials in `submit.php`.
-- From App server test:
-```bash
-nc -vz <rds-endpoint> 3306
-```
 
 ---
 
@@ -720,163 +709,7 @@ nc -vz <rds-endpoint> 3306
 
 ---
 
-# Full Code Reference (Copy/paste friendly)
-
-## `form.html`
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Student Registration Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f7f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-      width: 400px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-top: 15px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #218838;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Student Registration</h2>
-    <form action="submit.php" method="post">
-      <label for="fullname">Full Name</label>
-      <input type="text" name="fullname" required>
-
-      <label for="email">Email</label>
-      <input type="email" name="email" required>
-
-      <label for="phone">Phone</label>
-      <input type="text" name="phone" required>
-
-      <label for="course">Course</label>
-      <select name="course" required>
-        <option value="">-- Select Course --</option>
-        <option value="AWS">AWS</option>
-        <option value="DevOps">DevOps</option>
-        <option value="Python">Python</option>
-        <option value="Data Science">Data Science</option>
-      </select>
-
-      <button type="submit">Register</button>
-    </form>
-  </div>
-</body>
-</html>
-```
-
----
-
-## `submit.php` (as used in lab; replace placeholders with actual values)
-
-```php
-<?php
-$servername = "--";  // Database host(endpoint>
-$username = "--";         // Database username
-$password = "--";             // Database password
-$dbname = "--";      // Database name
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-// Check connection
-if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}
-// Collect form data
-$fullname = $_POST['fullname'];
-$email    = $_POST['email'];
-$phone    = $_POST['phone'];
-$course   = $_POST['course'];
-// Insert into database
-$sql = "INSERT INTO students (fullname, email, phone, course)
-        VALUES ('$fullname', '$email', '$phone', '$course')";
-if ($conn->query($sql) === TRUE) {
-  echo "<h2>Registration successful!</h2>";
-  echo "<a href='form.html'>Go Back</a>";
-} else {
-  echo "Error: " . $sql . "<br>" . $conn->error;
-}
-$conn->close();
-?>
-```
-
-> Reminder: This code is for learning purposes. Use prepared statements or PDO in real apps.
-
----
-
-## Example nginx blocks
-
-### Web server `/etc/nginx/sites-enabled/default` (PHP proxy block)
-
-```nginx
-# pass PHP scripts to App server (proxy)
-location ~ \.php$ {
-    proxy_pass http://10.0.2.49;
-    #       include snippets/fastcgi-php.conf;
-    #
-    #       # With php-fpm (or other unix sockets):
-    #       fastcgi_pass unix:/run/php/php7.4-fpm.sock;
-    #       # With php-cgi (or other tcp sockets):
-    #       fastcgi_pass 127.0.0.1:9000;
-}
-```
-
-> Replace `10.0.2.49` with your App Server private IP.
-
-### App server `/etc/nginx/sites-enabled/default` (PHP-FPM block)
-
-```nginx
-# pass PHP scripts to FastCGI server
-location ~ \.php$ {
-    include snippets/fastcgi-php.conf;
-    #
-    # With php-fpm (or other unix sockets):
-    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-    # With php-cgi (or other tcp sockets):
-    # fastcgi_pass 127.0.0.1:9000;
-}
-```
+> Reminder: This code of form.html and submit.php is for learning purposes. Use prepared statements in real apps.
 
 ---
 
@@ -899,9 +732,8 @@ scp -i .\path\to\key.pem .\path\to\key.pem ubuntu@<WEB_PUBLIC_IP>:.
 ssh -i .\path\to\key.pem ubuntu@<WEB_PUBLIC_IP>
 
 # Connect to RDS (from App server)
-mysql -h <rds-endpoint> -u admin -p
+sudo mysql -u admin -p -h <rds-endpoint>
 ```
-
 ---
 
 # Cleanup Checklist (reminder)
