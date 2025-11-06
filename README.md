@@ -386,7 +386,7 @@ Locate or add a PHP handling block and replace with:
 ```nginx
 # pass PHP scripts to App server (proxy)
 location ~ \.php$ {
-    proxy_pass http://10.0.2.49;
+    proxy_pass http://10.0.2.49; 
     #       include snippets/fastcgi-php.conf;
     #
     #       # With php-fpm (or other unix sockets):
