@@ -10,18 +10,15 @@ Step-by-step hands-on walkthrough to build a secure 3‑tier web application on 
 - **DB Tier (Private)** — Amazon RDS (MySQL) in a DB subnet group (private, not publicly accessible).  
 - **Networking** — Custom VPC, Internet Gateway (IGW), NAT Gateway (for private subnet egress), Route Tables, Security Groups, Elastic IP (for NAT).
 ---
+
 ## 🧭 Overview
 
 In this hands-on lab you will design and deploy a **3-Tier Web Application Architecture** on Amazon Web Services (AWS). The stack includes:
-# AWS VPC Components Comparison
-
-| **Characteristic** | **VPC** | **Subnet** | **Route Table** | **Internet Gateway** | **NAT Gateway** | **EC2 Instance** | **RDS Database** |
-|--------------------|---------|-------------|------------------|----------------------|-----------------|------------------|------------------|
-| **Purpose** | Parent container for all components | Subdivision of VPC, lives in AZ | Defines traffic paths for subnets | Connects VPC to the Internet | Enables outbound internet access for private subnets | Compute layer for applications | Data layer for storing information |
-| **Location** | Exists as a private network space | Lives in a specific Availability Zone | Associated with subnets | Attaches directly to the VPC | Sits inside a Public Subnet | Web Tier in Public Subnet, App Tier in Private Subnet | Deployed inside the Private Subnet |
-| **Connectivity** | Connects to Internet Gateway | Connected to Route Table | Points to Internet Gateway or NAT Gateway | Connects VPC to the Internet | Uses Internet Gateway for outbound traffic | Web Tier to Internet Gateway, App Tier to NAT Gateway | Connects to App Tier via VPC internal routing |
-| **Access** | Acts as a private network space | Public or Private | Public Route Table enables public access, Private Route Table enables indirect access | Enables public access for subnets | Allows internet access for private instances, remains unreachable from internet | Web Tier handles web traffic, App Tier talks to web tier and database | Only App Tier can communicate directly |
-
+- VPC for networking and isolation
+- EC2 instances for Web and Application tiers
+- RDS (MySQL/Aurora) for the Database tier
+- NAT Gateway, Internet Gateway, and Route Tables for connectivity management
+By the end of this practice, you’ll have a fully functional environment that mimics a real-world production setup complete with public/private subnets, secure EC2 communication, and database connectivity using RDS.
 
 This guide is instructor-style: each step tells you what you will do and why. It preserves the full commands, scripts, and configuration blocks so you can copy-paste during the lab.
 
@@ -370,8 +367,8 @@ Paste the following HTML (full file):
 </body>
 </html>
 ```
-
 Save and exit (`Ctrl+O`, `Ctrl+X`).
+> Reminder: This code of form.html and submit.php is for learning purposes. Use prepared statements in real apps.
 
 3. Test in browser:
 
@@ -553,10 +550,9 @@ if ($conn->query($sql) === TRUE) {
 $conn->close();
 ?>
 ```
-
 Save and exit.
-
-> **Security note:** This script uses direct interpolation of `$_POST` variables into SQL — it's fine for lab practice but **not** safe for production. Use prepared statements in real applications.
+> Reminder: This code of form.html and submit.php is for learning purposes. Use prepared statements in real apps.
+> **Security note:** This script uses direct interpolation of `$_POST` variables into SQL it's fine for lab practice but **not** safe for production. Use prepared statements in real applications.
 
 ---
 
@@ -708,8 +704,14 @@ You should see the submitted entries Ex -
 > Important: Delete NAT Gateway before deleting the Elastic IP to avoid stranded resources and charges.
 
 ---
+# AWS VPC Components Comparison
+| **Characteristic** | **VPC** | **Subnet** | **Route Table** | **Internet Gateway** | **NAT Gateway** | **EC2 Instance** | **RDS Database** |
+|--------------------|---------|-------------|------------------|----------------------|-----------------|------------------|------------------|
+| **Purpose** | Parent container for all components | Subdivision of VPC, lives in AZ | Defines traffic paths for subnets | Connects VPC to the Internet | Enables outbound internet access for private subnets | Compute layer for applications | Data layer for storing information |
+| **Location** | Exists as a private network space | Lives in a specific Availability Zone | Associated with subnets | Attaches directly to the VPC | Sits inside a Public Subnet | Web Tier in Public Subnet, App Tier in Private Subnet | Deployed inside the Private Subnet |
+| **Connectivity** | Connects to Internet Gateway | Connected to Route Table | Points to Internet Gateway or NAT Gateway | Connects VPC to the Internet | Uses Internet Gateway for outbound traffic | Web Tier to Internet Gateway, App Tier to NAT Gateway | Connects to App Tier via VPC internal routing |
+| **Access** | Acts as a private network space | Public or Private | Public Route Table enables public access, Private Route Table enables indirect access | Enables public access for subnets | Allows internet access for private instances, remains unreachable from internet | Web Tier handles web traffic, App Tier talks to web tier and database | Only App Tier can communicate directly |
 
-> Reminder: This code of form.html and submit.php is for learning purposes. Use prepared statements in real apps.
 
 ---
 
