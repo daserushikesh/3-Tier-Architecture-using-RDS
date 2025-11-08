@@ -1,4 +1,4 @@
-# AWS 3-Tier Architecture with RDS — Hands-On Practice Guide
+# AWS 3-Tier Architecture with RDS: Hands-On Practice Guide
 **Purpose**  
 Step-by-step hands-on walkthrough to build a secure 3‑tier web application on AWS using a LEMP stack (Linux, Nginx, MySQL, PHP) with Amazon RDS (MySQL) as the data layer. This guide follows the exact steps you provided and converts them into a professional, GitHub-ready README with commands and code blocks for copy-paste.
 
