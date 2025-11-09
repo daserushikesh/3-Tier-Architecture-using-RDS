@@ -245,7 +245,7 @@ You must allow Web server to reach App server via HTTP.
 From your local machine (PowerShell example on Windows):
 
 ```powershell
-scp -i .\path .\your-key.pem .\pathof your-key.pem ubuntu@<WEB_PUBLIC_IP>:.
+scp -i .\path of your key.pem .\pathof your key.pem ubuntu@<WEB_PUBLIC_IP>:.
 ```
 
 Example:
@@ -257,7 +257,7 @@ scp -i .\Desktop\Aws\public-server.pem .\Desktop\Aws\public-server.pem ubuntu@98
 SSH into the Web server:
 
 ```powershell
-ssh -i .\path	.\your-key.pem ubuntu@<WEB_PUBLIC_IP>
+ssh -i .\path of your key.pem ubuntu@<WEB_PUBLIC_IP>
 # Example:
 # ssh -i .\Desktop\Aws\public-server.pem ubuntu@98.88.252.41
 ```
