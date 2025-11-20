@@ -170,8 +170,7 @@ In this step, you will launch the Web server in the public subnet and install Ng
    - **Key pair:** choose or create
    - **Network settings:** VPC `Architecture`, Subnet `web-subnet`, Auto-assign Public IP: **Enable**
 3. Security group: create `web-sg` with inbound rules:
-   - HTTP — TCP 80 — Source `0.0.0.0/0`
-   - SSH — TCP 22 — Source `Your IP`
+   - SSH — TCP 22 — Source `0.0.0.0/0`
 4. Advanced details → User data:
 
 ```bash
